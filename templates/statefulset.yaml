@@ -1,10 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: ready-api-virtserver
 spec:
-  strategy:
-    type: Recreate
+  serviceName: "ready-api-virtserver-service"  # This is required for a StatefulSet
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
@@ -74,3 +73,14 @@ spec:
         - name: virtserver-config-folder
           persistentVolumeClaim:
             claimName: virtserver-config-folder
+  volumeClaimTemplates:
+  - metadata:
+      name: virtserver-config-folder
+      labels:
+        run: ready-api-virtserver
+    spec:
+      accessModes: 
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.configStorageSize }}
